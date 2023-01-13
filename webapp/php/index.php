@@ -242,12 +242,7 @@ $app->post('/login', function (Request $request, Response $response) {
     $user = $this->get('helper')->try_login($params['account_name'], $params['password']);
 
     if ($user) {
-        $_SESSION['user'] = [
-          'id' => $user['id'],
-          'account_name' => $user['account_name'],
-          'authority' => $user['authority'],
-          'del_flg' => $user['del_flg'],
-        ];
+        $_SESSION['user'] = $user;
         return redirect($response, '/', 302);
     } else {
         $this->get('flash')->addMessage('notice', 'アカウント名かパスワードが間違っています');
