@@ -275,8 +275,8 @@ $app->post('/register', function (Request $request, Response $response) {
         return redirect($response, '/register', 302);
     }
 
-    // $user = $this->get('helper')->fetch_first('SELECT 1 FROM users WHERE `account_name` = ?', $account_name);
-    $user = $this->get('helper')->fetch_first('SELECT COUNT (*) FROM users WHERE `account_name` = ? LIMIT 1', $account_name);
+    $user = $this->get('helper')->fetch_first('SELECT 1 FROM users WHERE `account_name` = ?', $account_name);
+    // $user = $this->get('helper')->fetch_first('SELECT COUNT (*) FROM users WHERE `account_name` = ? LIMIT 1', $account_name);
     if ($user) {
         $this->get('flash')->addMessage('notice', 'アカウント名がすでに使われています');
         return redirect($response, '/register', 302);
