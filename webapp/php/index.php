@@ -245,7 +245,7 @@ $app->post('/login', function (Request $request, Response $response) {
         $_SESSION['user'] = [
           'id' => $user['id'],
           'account_name' => $user['account_name'],
-          'authority' => $user['authorrity'],
+          'authority' => $user['authority'],
           'del_flg' => $user['del_flg'],
         ];
         return redirect($response, '/', 302);
