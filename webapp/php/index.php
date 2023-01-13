@@ -352,7 +352,7 @@ $app->get('/posts/{id}', function (Request $request, Response $response, $args) 
 
     $me = $this->get('helper')->get_session_user();
 
-    return $this->get('view')->render($response, 'post.php', ['post' => $post, 'me' => $me]);
+    return $this->get('view')->render($response, 'post_detail.php', ['post' => $post, 'me' => $me]);
 });
 
 $app->post('/', function (Request $request, Response $response) {
