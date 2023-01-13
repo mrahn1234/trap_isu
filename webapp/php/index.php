@@ -178,16 +178,18 @@ function redirect(Response $response, $location, $status) {
     return $response->withStatus($status)->withHeader('Location', $location);
 }
 
-function image_url($post) {
+function image_url($mime) {
     $ext = '';
-    if ($post['mime'] === 'image/jpeg') {
-        $ext = '.jpg';
-    } else if ($post['mime'] === 'image/png') {
-        $ext = '.png';
-    } else if ($post['mime'] === 'image/gif') {
-        $ext = '.gif';
+    if ($mime === 'image/jpeg') {
+        $ext = 'jpg';
+    } else if ($mime === 'image/png') {
+        $ext = 'png';
+    } else if ($mime === 'image/gif') {
+        $ext = 'gif';
+    }else {
+        return '';
     }
-    return "/image/{$post['id']}{$ext}";
+    return "/image/{$mime}.{$ext}";
 }
 
 function validate_user($account_name, $password) {
@@ -275,7 +277,7 @@ $app->post('/register', function (Request $request, Response $response) {
         return redirect($response, '/register', 302);
     }
 
-    $user = $this->get('helper')->fetch_first('SELECT 1 FROM users WHERE `account_name` = ?', $account_name);
+    $user = $this->get('helper')->fetch_first('SELECT 1 FROM users WHERE `account_name` = ? LIMIT 1', $account_name);
     // $user = $this->get('helper')->fetch_first('SELECT COUNT (*) FROM users WHERE `account_name` = ? LIMIT 1', $account_name);
     if ($user) {
         $this->get('flash')->addMessage('notice', 'アカウント名がすでに使われています');
