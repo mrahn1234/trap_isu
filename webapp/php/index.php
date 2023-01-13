@@ -110,11 +110,15 @@ $container->set('helper', function ($c) {
             $user = $this->fetch_first('SELECT * FROM users WHERE account_name = ? AND del_flg = 0', $account_name);
             if ($user !== false && calculate_passhash($user['account_name'], $password) == $user['passhash']) {
                 return $user;
-            } elseif ($user) {
-                return null;
-            } else {
+            }
+            else {
                 return null;
             }
+            // } elseif ($user) {
+            //     return null;
+            // } else {
+            //     return null;
+            // }
         }
 
         public function get_session_user() {
