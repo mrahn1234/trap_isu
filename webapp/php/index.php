@@ -178,7 +178,7 @@ function redirect(Response $response, $location, $status) {
     return $response->withStatus($status)->withHeader('Location', $location);
 }
 
-function image_url($mime) {
+function image_url($id, $mime) {
     $ext = '';
     if ($mime === 'image/jpeg') {
         $ext = 'jpg';
@@ -186,9 +186,10 @@ function image_url($mime) {
         $ext = 'png';
     } else if ($mime === 'image/gif') {
         $ext = 'gif';
+    }else {
+        return '';
     }
-    
-    return "/image/{$mime}.{$ext}";
+    return "/image/{$id}.{$ext}";
 }
 
 function validate_user($account_name, $password) {

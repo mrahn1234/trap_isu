@@ -6,7 +6,7 @@
     </a>
   </div>
   <div class="isu-post-image">
-    <img src="<?= escape_html(image_url($post['mime'])) ?>" alt='post-image' class="isu-image">
+    <img src="<?= escape_html(image_url($post['id'], $post['mime'])) ?>" alt='post-image' class="isu-image">
   </div>
   <div class="isu-post-text">
     <a href="/@<?= escape_html(rawurlencode($post['user']['account_name'])) ?>" class="isu-post-account-name"><?= escape_html($post['user']['account_name']) ?></a>
