@@ -186,9 +186,8 @@ function image_url($mime) {
         $ext = 'png';
     } else if ($mime === 'image/gif') {
         $ext = 'gif';
-    }else {
-        return '';
     }
+    
     return "/image/{$mime}.{$ext}";
 }
 
