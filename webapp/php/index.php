@@ -124,7 +124,7 @@ $container->set('helper', function ($c) {
         public function get_session_user() {
             // if (isset($_SESSION['user'], $_SESSION['user']['id'])) {
             if (isset($_SESSION['user']['id'])) {
-                return $this->fetch_first('SELECT id, authority FROM `users` WHERE `id` = ? LIMIT 1', $_SESSION['user']['id']); // use for saving in me variable
+                return $this->fetch_first('SELECT * FROM `users` WHERE `id` = ? LIMIT 1', $_SESSION['user']['id']); // use for saving in me variable
             } else {
                 return null;
             }
@@ -193,7 +193,7 @@ function image_url($id, $mime) {
 }
 
 function validate_user($account_name, $password) {
-    if (!(preg_match('/\A[0-9a-zA-Z_]{3,}\z/', $account_name) && preg_match('/\A[0-9a-zA-Z_]{6,}\z/', $password))) {
+    if (!(preg_match('/\A[0-9a-zA-Z_]{3,}\z/', $account_name) || !preg_match('/\A[0-9a-zA-Z_]{6,}\z/', $password))) {
         return false;
     }
     return true;
@@ -271,8 +271,8 @@ $app->post('/register', function (Request $request, Response $response) {
     $account_name = $params['account_name'];
     $password = $params['password'];
 
-    $validated = validate_user($account_name, $password);
-    if (!$validated) {
+    $isValid = validate_user($account_name, $password);
+    if (!$isValid) {
         $this->get('flash')->addMessage('notice', 'アカウント名は3文字以上、パスワードは6文字以上である必要があります');
         return redirect($response, '/register', 302);
     }
