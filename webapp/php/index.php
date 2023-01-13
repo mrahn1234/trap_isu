@@ -1,5 +1,4 @@
 <?php
-
 use Psr\Http\Message\ResponseInterface;
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
@@ -20,8 +19,7 @@ if (is_file($file)) {
     ][pathinfo($file, PATHINFO_EXTENSION)] ?? false;
     if ($mimetype) {
         header("Content-Type: {$mimetype}");
-        echo file_get_contents($file);
-        exit;
+        echo file_get_contents($file); exit;
     }
 }
 
@@ -40,7 +38,7 @@ session_start();
 
 // dependency
 $container = new Container();
-$container->set('settings', function () {
+$container->set('settings', function() {
     return [
         'public_folder' => dirname(dirname(__FILE__)) . '/public',
         'db' => [
@@ -62,10 +60,8 @@ $container->set('db', function ($c) {
 });
 
 $container->set('view', function ($c) {
-    return new class(__DIR__ . '/views/') extends \Slim\Views\PhpRenderer
-    {
-        public function render(\Psr\Http\Message\ResponseInterface $response, string $template, array $data = []): ResponseInterface
-        {
+    return new class(__DIR__ . '/views/') extends \Slim\Views\PhpRenderer {
+        public function render(\Psr\Http\Message\ResponseInterface $response, string $template, array $data = []): ResponseInterface {
             $data += ['view' => $template];
             return parent::render($response, 'layout.php', $data);
         }
@@ -77,22 +73,18 @@ $container->set('flash', function () {
 });
 
 $container->set('helper', function ($c) {
-    return new class($c)
-    {
+    return new class($c) {
         public PDO $db;
 
-        public function __construct($c)
-        {
+        public function __construct($c) {
             $this->db = $c->get('db');
         }
 
-        public function db()
-        {
+        public function db() {
             return $this->db;
         }
 
-        public function db_initialize()
-        {
+        public function db_initialize() {
             $db = $this->db();
             $sql = [];
             $sql[] = 'DELETE FROM users WHERE id > 1000';
@@ -100,13 +92,12 @@ $container->set('helper', function ($c) {
             $sql[] = 'DELETE FROM comments WHERE id > 100000';
             $sql[] = 'UPDATE users SET del_flg = 0';
             $sql[] = 'UPDATE users SET del_flg = 1 WHERE id % 50 = 0';
-            foreach ($sql as $s) {
+            foreach($sql as $s) {
                 $db->query($s);
             }
         }
 
-        public function fetch_first($query, ...$params)
-        {
+        public function fetch_first($query, ...$params) {
             $db = $this->db();
             $ps = $db->prepare($query);
             $ps->execute($params);
@@ -115,12 +106,12 @@ $container->set('helper', function ($c) {
             return $result;
         }
 
-        public function try_login($account_name, $password)
-        {
+        public function try_login($account_name, $password) {
             $user = $this->fetch_first('SELECT account_name, passhash, del_flg FROM users WHERE account_name = ? AND del_flg = 0', $account_name);
             if ($user !== false && calculate_passhash($user['account_name'], $password) == $user['passhash']) {
                 return $user;
-            } else {
+            }
+            else {
                 return null;
             }
             // } elseif ($user) {
@@ -130,8 +121,7 @@ $container->set('helper', function ($c) {
             // }
         }
 
-        public function get_session_user()
-        {
+        public function get_session_user() {
             // if (isset($_SESSION['user'], $_SESSION['user']['id'])) {
             if (isset($_SESSION['user'])) {
                 // return $this->fetch_first('SELECT * FROM `users` WHERE `id` = ? LIMIT 1', $_SESSION['user']['id']); // use for saving in me variable
@@ -141,8 +131,7 @@ $container->set('helper', function ($c) {
             }
         }
 
-        public function make_posts(array $results, $options = [])
-        {
+        public function make_posts(array $results, $options = []) {
             $options += ['all_comments' => false];
             $all_comments = $options['all_comments'];
 
@@ -173,6 +162,7 @@ $container->set('helper', function ($c) {
             }
             return $posts;
         }
+
     };
 });
 
@@ -181,18 +171,15 @@ $app = AppFactory::create();
 
 // ------- helper method for view
 
-function escape_html($h)
-{
+function escape_html($h) {
     return htmlspecialchars($h, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
-function redirect(Response $response, $location, $status)
-{
+function redirect(Response $response, $location, $status) {
     return $response->withStatus($status)->withHeader('Location', $location);
 }
 
-function image_url($id, $mime)
-{
+function image_url($id, $mime) {
     $ext = '';
     if ($mime === 'image/jpeg') {
         $ext = 'jpg';
@@ -200,46 +187,42 @@ function image_url($id, $mime)
         $ext = 'png';
     } else if ($mime === 'image/gif') {
         $ext = 'gif';
-    } else {
+    }else {
         return '';
     }
     return "/image/{$id}.{$ext}";
 }
 
-function validate_user($account_name, $password)
-{
+function validate_user($account_name, $password) {
     if (!(preg_match('/\A[0-9a-zA-Z_]{3,}\z/', $account_name) || !preg_match('/\A[0-9a-zA-Z_]{6,}\z/', $password))) {
         return false;
     }
     return true;
 }
 
-function digest($src)
-{
+function digest($src) {
     // opensslのバージョンによっては (stdin)= というのがつくので取る
     $src = escapeshellarg($src);
     return trim(`printf "%s" {$src} | openssl dgst -sha512 | sed 's/^.*= //'`);
 }
 
-function calculate_salt($account_name)
-{
+function calculate_salt($account_name) {
     return digest($account_name);
 }
 
-function calculate_passhash($account_name, $password)
-{
+function calculate_passhash($account_name, $password) {
     $salt = calculate_salt($account_name);
     return digest("{$password}:{$salt}");
 }
 
 // --------
 
-$app->get('/initialize', function (Response $response) {
+$app->get('/initialize', function (Request $request, Response $response) {
     $this->get('helper')->db_initialize();
     return $response;
 });
 
-$app->get('/login', function (Response $response) {
+$app->get('/login', function (Request $request, Response $response) {
     if ($this->get('helper')->get_session_user() !== null) {
         return redirect($response, '/', 302);
     }
@@ -272,7 +255,7 @@ $app->post('/login', function (Request $request, Response $response) {
     }
 });
 
-$app->get('/register', function (Response $response) {
+$app->get('/register', function (Request $request, Response $response) {
     if ($this->get('helper')->get_session_user() !== null) {
         return redirect($response, '/', 302);
     }
@@ -320,12 +303,12 @@ $app->post('/register', function (Request $request, Response $response) {
     return redirect($response, '/', 302);
 });
 
-$app->get('/logout', function (Response $response) {
+$app->get('/logout', function (Request $request, Response $response) {
     unset($_SESSION['user']);
     return redirect($response, '/', 302);
 });
 
-$app->get('/', function (Response $response) {
+$app->get('/', function (Request $request, Response $response) {
     $me = $this->get('helper')->get_session_user();
 
     $db = $this->get('db');
@@ -353,7 +336,7 @@ $app->get('/posts', function (Request $request, Response $response) {
     return $this->get('view')->render($response, 'posts.php', ['posts' => $posts]);
 });
 
-$app->get('/posts/{id}', function (Response $response, $args) {
+$app->get('/posts/{id}', function (Request $request, Response $response, $args) {
     $db = $this->get('db');
     $ps = $db->prepare('SELECT * FROM `posts` WHERE `id` = ?');
     $ps->execute([$args['id']]);
@@ -408,10 +391,10 @@ $app->post('/', function (Request $request, Response $response) {
         $query = 'INSERT INTO `posts` (`user_id`, `mime`, `imgdata`, `body`) VALUES (?,?,?,?)';
         $ps = $db->prepare($query);
         $ps->execute([
-            $me['id'],
-            $mime,
-            file_get_contents($_FILES['file']['tmp_name']),
-            $params['body'],
+          $me['id'],
+          $mime,
+          file_get_contents($_FILES['file']['tmp_name']),
+          $params['body'],
         ]);
         $pid = $db->lastInsertId();
         return redirect($response, "/posts/{$pid}", 302);
@@ -421,7 +404,7 @@ $app->post('/', function (Request $request, Response $response) {
     }
 });
 
-$app->get('/image/{id}.{ext}', function (Response $response, $args) {
+$app->get('/image/{id}.{ext}', function (Request $request, Response $response, $args) {
     if ($args['id'] === 0) {
         return $response;
     }
@@ -430,8 +413,7 @@ $app->get('/image/{id}.{ext}', function (Response $response, $args) {
 
     if (($args['ext'] == 'jpg' && $post['mime'] == 'image/jpeg') ||
         ($args['ext'] == 'png' && $post['mime'] == 'image/png') ||
-        ($args['ext'] == 'gif' && $post['mime'] == 'image/gif')
-    ) {
+        ($args['ext'] == 'gif' && $post['mime'] == 'image/gif')) {
         $response->getBody()->write($post['imgdata']);
         return $response->withHeader('Content-Type', $post['mime']);
     }
@@ -470,7 +452,7 @@ $app->post('/comment', function (Request $request, Response $response) {
     return redirect($response, "/posts/{$post_id}", 302);
 });
 
-$app->get('/admin/banned', function (Response $response) {
+$app->get('/admin/banned', function (Request $request, Response $response) {
     $me = $this->get('helper')->get_session_user();
 
     if ($me === null) {
@@ -545,7 +527,7 @@ $app->get('/@{account_name}', function (Request $request, Response $response, $a
         $commented_count = $this->get('helper')->fetch_first("SELECT COUNT(*) AS count FROM `comments` WHERE `post_id` IN ({$placeholder})", ...$post_ids)['count'];
     }
 
-    return $this->get('view')->render($response, 'user.php', ['posts' => $posts, 'user' => $user, 'post_count' => $post_count, 'comment_count' => $comment_count, 'commented_count' => $commented_count]);
+    return $this->get('view')->render($response, 'user.php', ['posts' => $posts, 'user' => $user, 'post_count' => $post_count, 'comment_count' => $comment_count, 'commented_count'=> $commented_count]);
 });
 
 $app->run();
