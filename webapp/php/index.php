@@ -123,8 +123,9 @@ $container->set('helper', function ($c) {
 
         public function get_session_user() {
             // if (isset($_SESSION['user'], $_SESSION['user']['id'])) {
-            if (isset($_SESSION['user']['id'])) {
-                return $this->fetch_first('SELECT * FROM `users` WHERE `id` = ? LIMIT 1', $_SESSION['user']['id']); // use for saving in me variable
+            if (isset($_SESSION['user'])) {
+                // return $this->fetch_first('SELECT * FROM `users` WHERE `id` = ? LIMIT 1', $_SESSION['user']['id']); // use for saving in me variable
+                return $_SESSION['user'];
             } else {
                 return null;
             }
@@ -243,6 +244,9 @@ $app->post('/login', function (Request $request, Response $response) {
     if ($user) {
         $_SESSION['user'] = [
           'id' => $user['id'],
+          'account_name' => $user['account_name'],
+          'authority' => $user['authorrity'],
+          'del_flg' => $user['del_flg'],
         ];
         return redirect($response, '/', 302);
     } else {
@@ -398,7 +402,7 @@ $app->post('/', function (Request $request, Response $response) {
 });
 
 $app->get('/image/{id}.{ext}', function (Request $request, Response $response, $args) {
-    if ($args['id'] == 0) {
+    if ($args['id'] === 0) {
         return $response;
     }
 
