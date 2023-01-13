@@ -242,7 +242,12 @@ $app->post('/login', function (Request $request, Response $response) {
     $user = $this->get('helper')->try_login($params['account_name'], $params['password']);
 
     if ($user) {
-        $_SESSION['user'] = $user;
+        $_SESSION['user'] = [
+            'id' => $db->lastInsertId(),
+            'account_name' => $user['account_name'],
+            'authority' => $user['authority'],
+            'del_flag' => $user['del_flag'],
+        ];
         return redirect($response, '/', 302);
     } else {
         $this->get('flash')->addMessage('notice', 'アカウント名かパスワードが間違っています');
@@ -291,6 +296,9 @@ $app->post('/register', function (Request $request, Response $response) {
     ]);
     $_SESSION['user'] = [
         'id' => $db->lastInsertId(),
+        'account_name' => $account_name,
+        'authority' => 0,
+        'del_flag' => 0,
     ];
     return redirect($response, '/', 302);
 });
