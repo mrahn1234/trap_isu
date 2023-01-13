@@ -124,7 +124,7 @@ $container->set('helper', function ($c) {
         public function get_session_user() {
             // if (isset($_SESSION['user'], $_SESSION['user']['id'])) {
             if (isset($_SESSION['user']['id'])) {
-                return $this->fetch_first('SELECT * FROM `users` WHERE `id` = ? LIMIT 1', $_SESSION['user']['id']); // use for saving in me variable
+                return $this->fetch_first('SELECT id, authority FROM `users` WHERE `id` = ? LIMIT 1', $_SESSION['user']['id']); // use for saving in me variable
             } else {
                 return null;
             }
