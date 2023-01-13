@@ -107,7 +107,7 @@ $container->set('helper', function ($c) {
         }
 
         public function try_login($account_name, $password) {
-            $user = $this->fetch_first('SELECT account_name, passhash, del_flg FROM users WHERE account_name = ? AND del_flg = 0', $account_name);
+            $user = $this->fetch_first('SELECT * FROM users WHERE account_name = ? AND del_flg = 0', $account_name);
             if ($user !== false && calculate_passhash($user['account_name'], $password) == $user['passhash']) {
                 return $user;
             }
@@ -271,8 +271,8 @@ $app->post('/register', function (Request $request, Response $response) {
     $account_name = $params['account_name'];
     $password = $params['password'];
 
-    $isValid = validate_user($account_name, $password);
-    if (!$isValid) {
+    $validated = validate_user($account_name, $password);
+    if (!$validated) {
         $this->get('flash')->addMessage('notice', 'アカウント名は3文字以上、パスワードは6文字以上である必要があります');
         return redirect($response, '/register', 302);
     }
@@ -495,7 +495,7 @@ $app->post('/admin/banned', function (Request $request, Response $response) {
 
 $app->get('/@{account_name}', function (Request $request, Response $response, $args) {
     $db = $this->get('db');
-    $user = $this->get('helper')->fetch_first('SELECT * FROM `users` WHERE `account_name` = ? AND `del_flg` = 0', $args['account_name']);
+    $user = $this->get('helper')->fetch_first('SELECT account_name, id, del_flg FROM `users` WHERE `account_name` = ? AND `del_flg` = 0', $args['account_name']);
 
     if ($user === false) {
         $response->getBody()->write('404');
