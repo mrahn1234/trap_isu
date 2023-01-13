@@ -462,7 +462,7 @@ $app->get('/admin/banned', function (Request $request, Response $response) {
     $ps->execute();
     $users = $ps->fetchAll(PDO::FETCH_ASSOC);
 
-    return $this->get('view')->render($response, 'banned.php', ['users' => $users, 'me' => $me]);
+    return $this->get('view')->render($response, 'banned.php', ['users' => $users]);
 });
 
 $app->post('/admin/banned', function (Request $request, Response $response) {
